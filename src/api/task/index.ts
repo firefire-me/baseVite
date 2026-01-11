@@ -1,7 +1,14 @@
 import request from '../axios';
 
+// 任务数据类型
+interface Task {
+  _id: string;
+  title: string;
+  isCompleted: boolean;
+}
+
 // /api/tasks 获取任务列表
-export const getTasks = () => {
+export const getTasks = (): Promise<Task[]> => {
   return request.get("/api/tasks");
 };
 

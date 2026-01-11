@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
-import { register } from "@/api/Login";
+import { register } from "@/api/login";
 
 const router = useRouter();
 const username = ref("");

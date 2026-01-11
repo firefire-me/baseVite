@@ -64,7 +64,7 @@ const handleOk = async () => {
   }
 
   try {
-    const response = await createTask({
+    await createTask({
       title: formData.value.title.trim(),
       isCompleted: formData.value.isCompleted,
     });
@@ -173,7 +173,7 @@ const columns = [
       <a-table
         :columns="columns"
         :data-source="tasks"
-        :row-key="(record) => record.id"
+        :row-key="(record: Task) => record.id"
         :pagination="false"
         :loading="loading"
         bordered
