@@ -22,17 +22,43 @@ const formData = ref({
   isCompleted: false,
 });
 
+// 分页相关状态
+const currentPage = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const totalPages = ref(0);
+
+// 搜索相关状态
+const searchText = ref("");
+const statusFilter = ref<boolean | undefined>(undefined);
+
 // 加载任务列表
-const loadTasks = async () => {
+const loadTasks = async (
+  page: number = currentPage.value,
+  limit: number = pageSize.value,
+  search: string = searchText.value,
+  status: boolean | undefined = statusFilter.value
+) => {
   try {
     loading.value = true;
-    const response = await getTasks();
+    const response = await getTasks({
+      page,
+      limit,
+      search,
+      status,
+    });
 
-    tasks.value = response.map((item) => ({
+    tasks.value = response.data.map((item) => ({
       id: item._id,
       title: item.title,
       isCompleted: item.isCompleted,
     }));
+
+    // 更新分页信息
+    total.value = response.pagination.total;
+    currentPage.value = response.pagination.page;
+    pageSize.value = response.pagination.limit;
+    totalPages.value = response.pagination.totalPages;
   } catch (error) {
     message.error("获取任务列表失败");
     console.error("Failed to get tasks:", error);
@@ -114,6 +140,33 @@ const handleDelete = async (id: string) => {
   }
 };
 
+// 搜索处理
+const handleSearch = () => {
+  currentPage.value = 1; // 搜索时重置到第一页
+  loadTasks();
+};
+
+// 重置处理
+const handleReset = () => {
+  searchText.value = "";
+  statusFilter.value = undefined;
+  currentPage.value = 1;
+  loadTasks();
+};
+
+// 页码变化处理
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  loadTasks();
+};
+
+// 每页显示数量变化处理
+const handlePageSizeChange = (_current: number, size: number) => {
+  pageSize.value = size;
+  currentPage.value = 1; // 改变每页显示数量时重置到第一页
+  loadTasks();
+};
+
 // 组件挂载时加载任务列表
 loadTasks();
 
@@ -169,12 +222,50 @@ const columns = [
       <template #extra>
         <a-button type="primary" @click="showModal">新增任务</a-button>
       </template>
+      <!-- 搜索表单 -->
+      <div
+        class="search-form"
+        style="
+          margin-bottom: 16px;
+          display: flex;
+          gap: 16px;
+          align-items: center;
+        "
+      >
+        <a-input
+          v-model:value="searchText"
+          placeholder="搜索任务名称"
+          style="width: 200px"
+          allow-clear
+        />
+        <a-select
+          v-model:value="statusFilter"
+          placeholder="任务状态"
+          style="width: 120px"
+          allow-clear
+        >
+          <a-select-option :value="true">已完成</a-select-option>
+          <a-select-option :value="false">未完成</a-select-option>
+        </a-select>
+        <a-button type="primary" @click="handleSearch">搜索</a-button>
+        <a-button @click="handleReset">重置</a-button>
+      </div>
+
       <!-- 任务列表 -->
       <a-table
         :columns="columns"
         :data-source="tasks"
         :row-key="(record: Task) => record.id"
-        :pagination="false"
+        :pagination="{
+          current: currentPage,
+          pageSize: pageSize,
+          total: total,
+          onChange: handlePageChange,
+          onShowSizeChange: handlePageSizeChange,
+          showSizeChanger: true,
+          pageSizeOptions: ['10', '20', '50', '100'],
+          showTotal: (total: number) => `共 ${total} 条记录`,
+        }"
         :loading="loading"
         bordered
       />

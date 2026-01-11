@@ -7,9 +7,32 @@ interface Task {
   isCompleted: boolean;
 }
 
+// 分页信息类型
+interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+// API 响应数据类型
+interface TaskListResponse {
+  success: boolean;
+  data: Task[];
+  pagination: Pagination;
+}
+
+// 查询参数类型
+export interface TaskQueryParams {
+  page?: number;
+  limit?: number;
+  status?: boolean;
+  search?: string;
+}
+
 // /api/tasks 获取任务列表
-export const getTasks = (): Promise<Task[]> => {
-  return request.get("/api/tasks");
+export const getTasks = (params?: TaskQueryParams): Promise<TaskListResponse> => {
+  return request.get("/api/tasks", { params });
 };
 
 // 创建新任务 (CREATE)
