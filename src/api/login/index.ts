@@ -20,3 +20,10 @@ interface RegisterResponse {
 export const register = (data: { username: string; password: string }): Promise<RegisterResponse> => {
   return request.post("/api/register", data);
 };
+
+// 测试 /text
+export const text = (): Promise<void> => {
+  // return request.get("/text");
+
+  return request.get("https://api.575755.xyz/text");
+};

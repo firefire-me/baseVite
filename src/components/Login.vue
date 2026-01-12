@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
 import { login } from "@/api/login";
@@ -37,6 +37,8 @@ const handleLogin = async () => {
     loading.value = false;
   }
 };
+
+onMounted(() => {});
 </script>
 
 <template>
