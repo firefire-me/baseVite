@@ -31,6 +31,11 @@ const routes: RouteRecordRaw[] = [
         path: 'task-center',
         name: 'TaskCenter',
         component: () => import('../components/TaskCenter.vue')
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('../components/Profile.vue')
       }
     ]
   }

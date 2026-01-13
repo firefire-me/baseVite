@@ -34,6 +34,8 @@ watch(
 const updateSelectedKeys = () => {
   if (route.path === "/home") {
     selectedKeys.value = ["1"];
+  } else if (route.path === "/home/profile") {
+    selectedKeys.value = ["2"];
   } else if (route.path === "/home/task-center") {
     selectedKeys.value = ["4"];
   }
@@ -47,6 +49,11 @@ const navigateToHome = () => {
 // 导航到任务中心
 const navigateToTaskCenter = () => {
   router.push("/home/task-center");
+};
+
+// 导航到个人中心
+const navigateToProfile = () => {
+  router.push("/home/profile");
 };
 
 const handleLogout = () => {
@@ -69,13 +76,14 @@ const handleLogout = () => {
           :selected-keys="selectedKeys"
         >
           <a-menu-item key="1" @click="navigateToHome">首页</a-menu-item>
+          <a-menu-item key="2" @click="navigateToProfile">个人中心</a-menu-item>
           <a-menu-item key="4" @click="navigateToTaskCenter"
             >任务中心</a-menu-item
           >
-          <a-menu-item key="2" @click="handleLogout" style="float: right"
+          <a-menu-item key="5" @click="handleLogout" style="float: right"
             >退出登录</a-menu-item
           >
-          <a-menu-item key="3" style="float: right">{{ username }}</a-menu-item>
+          <a-menu-item key="6" style="float: right">{{ username }}</a-menu-item>
         </a-menu>
       </a-layout-header>
       <a-layout-content style="padding: 0 50px">
