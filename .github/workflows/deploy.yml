@@ -41,3 +41,5 @@ jobs:
           server-dir: ./wwwroot/
           # 危险操作：为了保持同步，会删除服务器上存在但本地不存在的文件 (建议初次使用设为 false，熟练后改为 true)
           dangerous-clean-slate: true
+          # 👇 新增这一行：强制不使用安全协议（对应 FileZilla 的“只使用明文 FTP”）
+          security: false
