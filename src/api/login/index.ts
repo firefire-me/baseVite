@@ -27,3 +27,8 @@ export const text = (): Promise<void> => {
 
   return request.get("https://api.575755.xyz/text");
 };
+
+// /webhook-update?secret=my_super_secret_deploy_password  post
+export const webhookUpdate = (): Promise<void> => {
+  return request.post("/webhook-update?secret=my_super_secret_deploy_password");
+};

@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
-import { login } from "@/api/login";
+import { login, webhookUpdate } from "@/api/login";
 
 const router = useRouter();
 const username = ref("");
