@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import { message } from "ant-design-vue";
 import { uploadFile } from "@/api/upload";
+import { PlusOutlined } from "@ant-design/icons-vue";
 
 const username = ref("");
 const avatarUrl = ref("");
@@ -30,21 +31,21 @@ const handleUpload = ({ file }: { file: File }) => {
   const formData = new FormData();
   formData.append("file", file);
   uploadFile(formData)
-    .then((response) => {
+    .then((response: any) => {
       console.log(response, "response");
 
       handleUploadSuccess(response);
     })
-    .catch((error) => {
+    .catch(() => {
       message.error("头像上传失败");
     });
 };
 
 // 处理头像上传成功
-const handleUploadSuccess = (response: { url: string }) => {
+const handleUploadSuccess = (response: any) => {
   // 在实际项目中，这里应该处理服务器返回的头像 URL
   // 这里我们使用本地 URL 进行模拟
-  const url = response.url;
+  const url = response.url || response.data?.url || "";
   avatarUrl.value = url;
   const name = url.split("/").pop() || "avatar.jpg";
   fileList.value = [{ uid: "-1", name, status: "done", url }];
@@ -99,7 +100,7 @@ const handleRemove = () => {
                 class="avatar"
               />
               <div v-else class="avatar-uploader-trigger">
-                <a-icon type="plus" />
+                <PlusOutlined />
                 <div class="ant-upload-text">上传</div>
               </div>
             </a-upload>
