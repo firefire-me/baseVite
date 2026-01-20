@@ -2,7 +2,6 @@
 import { ref, onMounted } from "vue";
 import { getTasks } from "@/api/task/index";
 import StatCard from "@/components/StatCard.vue";
-import BreadcrumbNav from "@/components/BreadcrumbNav.vue";
 import {
   PlusOutlined,
   UnorderedListOutlined,
@@ -71,8 +70,6 @@ const getActivityColor = (type: string) => {
 
 <template>
   <div class="dashboard-container">
-    <BreadcrumbNav />
-
     <div class="welcome-section">
       <h1>欢迎回来，{{ username }}！</h1>
       <p>这是您的任务管理概览</p>

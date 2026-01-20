@@ -7,30 +7,30 @@ const route = useRoute();
 const router = useRouter();
 
 const breadcrumbItems = computed(() => {
-  const pathArray = route.path.split("/").filter((item) => item);
-  const items = [
-    {
-      title: "首页",
-      path: "/home",
-    },
-  ];
+  const items: { title: string; path: string }[] = [];
+  const matched = route.matched;
 
-  const routeMap: Record<string, string> = {
-    "task-center": "任务中心",
-    profile: "个人中心",
-  };
-
-  pathArray.forEach((path, index) => {
-    if (routeMap[path]) {
+  matched.forEach((record, index) => {
+    if (record.meta && record.meta.title) {
       items.push({
-        title: routeMap[path],
-        path:
-          index === pathArray.length - 1
-            ? ""
-            : `/${pathArray.slice(0, index + 1).join("/")}`,
+        title: record.meta.title as string,
+        path: index === matched.length - 1 ? "" : record.path,
       });
+    } else if (record.path === "/home" || record.path === "/") {
+      // 默认首页
+      if (items.length === 0 || items[0].title !== "首页") {
+        items.unshift({
+          title: "首页",
+          path: "/home",
+        });
+      }
     }
   });
+
+  // 如果当前是 /home，只需要保留一个“首页”
+  if (route.path === "/home") {
+    return [{ title: "首页", path: "" }];
+  }
 
   return items;
 });

@@ -44,6 +44,47 @@ const routes: RouteRecordRaw[] = [
         component: () => import("../components/Profile.vue"),
         meta: { title: "个人中心", icon: "UserOutlined", key: "profile" },
       },
+      {
+        path: "image-processing",
+        name: "ImageProcessing",
+        redirect: "/home/image-processing/lazy-load",
+        meta: {
+          title: "图片处理",
+          icon: "PictureOutlined",
+          key: "image-processing",
+        },
+        children: [
+          {
+            path: "lazy-load",
+            name: "LazyLoad",
+            component: () =>
+              import("../components/image-processing/LazyLoad.vue"),
+            meta: {
+              title: "图片懒加载",
+              icon: "FileImageOutlined",
+              key: "lazy-load",
+            },
+          },
+          {
+            path: "compress",
+            name: "Compress",
+            component: () =>
+              import("../components/image-processing/Compress.vue"),
+            meta: {
+              title: "图片压缩",
+              icon: "CompressOutlined",
+              key: "compress",
+            },
+          },
+          {
+            path: "annotate",
+            name: "Annotate",
+            component: () =>
+              import("../components/image-processing/Annotate.vue"),
+            meta: { title: "图片标注", icon: "EditOutlined", key: "annotate" },
+          },
+        ],
+      },
 
       // 404 路由 重定向到首页的路由
       {

@@ -2,6 +2,7 @@
 import { ref, watch, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { message } from "ant-design-vue";
+import BreadcrumbNav from "./BreadcrumbNav.vue";
 import {
   DashboardOutlined,
   UnorderedListOutlined,
@@ -10,13 +11,18 @@ import {
   MenuFoldOutlined,
   LogoutOutlined,
   DownOutlined,
+  PictureOutlined,
+  FileImageOutlined,
+  CompressOutlined,
+  EditOutlined,
 } from "@ant-design/icons-vue";
 
 const router = useRouter();
 const route = useRoute();
 
 const collapsed = ref(false);
-const selectedKeys = ref(["home"]);
+const selectedKeys = ref<string[]>([]);
+const openKeys = ref<string[]>([]);
 const username = ref("");
 const avatarUrl = ref("");
 
@@ -24,21 +30,121 @@ const iconMap: Record<string, any> = {
   DashboardOutlined,
   UnorderedListOutlined,
   UserOutlined,
+  PictureOutlined,
+  FileImageOutlined,
+  CompressOutlined,
+  EditOutlined,
 };
 
 const menuItems = computed(() => {
   const homeRoute = router.options.routes.find((r: any) => r.path === "/home");
   if (!homeRoute || !homeRoute.children) return [];
 
+  const mapRoute = (child: any, parentPath = "/home") => {
+    let fullPath = child.path.startsWith("/")
+      ? child.path
+      : `${parentPath}/${child.path}`.replace(/\/+/g, "/");
+
+    // 移除末尾的斜杠，除非是根路径 "/"
+    if (fullPath.length > 1 && fullPath.endsWith("/")) {
+      fullPath = fullPath.slice(0, -1);
+    }
+
+    const item: any = {
+      key: child.meta?.key || child.name,
+      icon: child.meta?.icon,
+      label: child.meta?.title,
+      path: fullPath,
+    };
+
+    if (child.children && child.children.length > 0) {
+      const children = child.children
+        .filter((c: any) => c.meta?.title)
+        .map((c: any) => mapRoute(c, fullPath));
+      if (children.length > 0) {
+        item.children = children;
+      }
+    }
+
+    return item;
+  };
+
   return homeRoute.children
     .filter((child: any) => child.meta?.title)
-    .map((child: any) => ({
-      key: child.meta.key,
-      icon: child.meta.icon,
-      label: child.meta.title,
-      path: `/home/${child.path}`,
-    }));
+    .map((child: any) => mapRoute(child));
 });
+
+const updateSelectedKeys = () => {
+  const findItem = (items: any[]): any => {
+    // 优先搜索子节点（更深层次的匹配）
+    for (const item of items) {
+      if (item.children) {
+        const found = findItem(item.children);
+        if (found) return found;
+      }
+
+      // 获取规范化的路径进行比较
+      const normalizedRoutePath = route.path.replace(/\/$/, "") || "/";
+      const normalizedItemPath = item.path.replace(/\/$/, "") || "/";
+
+      // 然后搜索当前节点
+      if (
+        normalizedRoutePath === normalizedItemPath ||
+        (normalizedItemPath !== "/home" &&
+          normalizedItemPath !== "/" &&
+          normalizedRoutePath.startsWith(normalizedItemPath + "/"))
+      ) {
+        return item;
+      }
+    }
+    return null;
+  };
+
+  const matchedItem = findItem(menuItems.value);
+  if (matchedItem) {
+    selectedKeys.value = [matchedItem.key];
+    // Find parent to open
+    const findParentKeys = (
+      items: any[],
+      targetKey: string,
+      parents: string[] = [],
+    ): string[] | null => {
+      for (const item of items) {
+        if (item.key === targetKey) return parents;
+        if (item.children) {
+          const res = findParentKeys(item.children, targetKey, [
+            ...parents,
+            item.key,
+          ]);
+          if (res) return res;
+        }
+      }
+      return null;
+    };
+    const parents = findParentKeys(menuItems.value, matchedItem.key);
+    if (parents) {
+      openKeys.value = [...new Set([...openKeys.value, ...parents])];
+    }
+  }
+};
+
+const handleMenuClick = ({ key }: { key: string }) => {
+  const findItem = (items: any[]): any => {
+    for (const item of items) {
+      if (item.key === key) return item;
+      if (item.children) {
+        const found = findItem(item.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  const menuItem = findItem(menuItems.value);
+  if (menuItem && menuItem.path) {
+    router.push(menuItem.path);
+  }
+};
 
 onMounted(() => {
   const storedUsername = localStorage.getItem("username");
@@ -56,27 +162,9 @@ watch(
   () => route.path,
   () => {
     updateSelectedKeys();
-  }
+  },
+  { immediate: true },
 );
-
-const updateSelectedKeys = () => {
-  const sortedMenuItems = [...menuItems.value].sort(
-    (a, b) => b.path.length - a.path.length
-  );
-  const matchedItem = sortedMenuItems.find((item) =>
-    route.path.startsWith(item.path)
-  );
-  if (matchedItem) {
-    selectedKeys.value = [matchedItem.key];
-  }
-};
-
-const handleMenuClick = ({ key }: { key: string }) => {
-  const menuItem = menuItems.value.find((item) => item.key === key);
-  if (menuItem) {
-    router.push(menuItem.path);
-  }
-};
 
 const handleLogout = () => {
   localStorage.removeItem("token");
@@ -105,16 +193,31 @@ const toggleCollapsed = () => {
       </div>
       <a-menu
         v-model:selectedKeys="selectedKeys"
+        v-model:openKeys="openKeys"
         theme="dark"
         mode="inline"
         @click="handleMenuClick"
       >
-        <a-menu-item v-for="item in menuItems" :key="item.key">
-          <template #icon>
-            <component :is="iconMap[item.icon]" />
-          </template>
-          <span>{{ item.label }}</span>
-        </a-menu-item>
+        <template v-for="item in menuItems" :key="item.key">
+          <a-sub-menu v-if="item.children" :key="item.key">
+            <template #icon>
+              <component :is="iconMap[item.icon]" />
+            </template>
+            <template #title>{{ item.label }}</template>
+            <a-menu-item v-for="child in item.children" :key="child.key">
+              <template #icon>
+                <component :is="iconMap[child.icon]" />
+              </template>
+              <span>{{ child.label }}</span>
+            </a-menu-item>
+          </a-sub-menu>
+          <a-menu-item v-else :key="item.key">
+            <template #icon>
+              <component :is="iconMap[item.icon]" />
+            </template>
+            <span>{{ item.label }}</span>
+          </a-menu-item>
+        </template>
       </a-menu>
     </a-layout-sider>
     <a-layout>
@@ -158,6 +261,7 @@ const toggleCollapsed = () => {
       </a-layout-header>
       <a-layout-content class="content">
         <div class="content-wrapper">
+          <BreadcrumbNav />
           <router-view />
         </div>
       </a-layout-content>
