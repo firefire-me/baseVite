@@ -18,7 +18,7 @@ const breadcrumbItems = computed(() => {
       });
     } else if (record.path === "/home" || record.path === "/") {
       // 默认首页
-      if (items.length === 0 || items[0].title !== "首页") {
+      if (items.length === 0 || items[0]?.title !== "首页") {
         items.unshift({
           title: "首页",
           path: "/home",
