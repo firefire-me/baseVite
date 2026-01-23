@@ -9,7 +9,7 @@
       <div v-for="n in 20" :key="n" class="image-item">
         <img
           v-lazy="`https://picsum.photos/800/600?random=${n}`"
-          src="https://via.placeholder.com/800x600?text=Loading..."
+          src="https://placehold.co/800x600?text=Loading..."
           :alt="`Random Image ${n}`"
           class="lazy-img"
         />
