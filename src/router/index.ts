@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 
+
+
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
@@ -85,6 +87,12 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: "monitor",
+        name: "Monitor",
+        component: () => import("../components/MonitorPanel.vue"),
+        meta: { title: "性能监测", icon: "DashboardOutlined", key: "monitor" },
+      },
 
       // 404 路由 重定向到首页的路由
       {
@@ -101,8 +109,17 @@ const router = createRouter({
   routes,
 });
 
+// 导入监测模块
+import { reportRouteData } from '../monitor/monitor-report';
+
+// 路由性能监测
+let routeStartTime = 0;
+
 // 路由守卫
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, from, next) => {
+  // 记录路由开始时间
+  routeStartTime = Date.now();
+  
   const isAuthenticated = localStorage.getItem("token");
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (isAuthenticated) {
@@ -113,6 +130,19 @@ router.beforeEach((to, _from, next) => {
   } else {
     next();
   }
+});
+
+// 路由切换完成后上报性能数据
+router.afterEach((to, from) => {
+  // 计算路由切换持续时间
+  const duration = Date.now() - routeStartTime;
+  
+  // 上报路由性能数据
+  reportRouteData(
+    from.path || 'unknown',
+    to.path || 'unknown',
+    duration
+  );
 });
 
 export default router;
