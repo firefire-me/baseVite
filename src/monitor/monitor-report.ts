@@ -101,13 +101,13 @@ export class MonitorReport {
     this.startBatchTimer();
 
     // 监听白屏事件
-    whiteScreenMonitor.config.onWhiteScreen = (event) => {
+    whiteScreenMonitor.setOnWhiteScreen((event) => {
       this.addWhiteScreenEvent(event);
-    };
+    });
 
-    whiteScreenMonitor.config.onRecovery = (event) => {
+    whiteScreenMonitor.setOnRecovery((event) => {
       this.addWhiteScreenEvent(event);
-    };
+    });
 
     // 监听错误事件
     this.listenToErrors();
@@ -190,8 +190,8 @@ export class MonitorReport {
    * 获取网络类型
    */
   private getNetworkType(): string {
-    if (navigator && navigator.connection) {
-      return navigator.connection.effectiveType || 'unknown';
+    if (navigator && (navigator as any).connection) {
+      return (navigator as any).connection.effectiveType || 'unknown';
     }
     return 'unknown';
   }

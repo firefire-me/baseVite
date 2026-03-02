@@ -107,41 +107,41 @@ export class PerformanceMonitor {
     if (!navigationEntry) return;
 
     // 原始指标
-    this.metrics.navigationStart = navigationEntry.navigationStart;
-    this.metrics.unloadEventStart = navigationEntry.unloadEventStart;
-    this.metrics.unloadEventEnd = navigationEntry.unloadEventEnd;
-    this.metrics.redirectStart = navigationEntry.redirectStart;
-    this.metrics.redirectEnd = navigationEntry.redirectEnd;
-    this.metrics.fetchStart = navigationEntry.fetchStart;
-    this.metrics.domainLookupStart = navigationEntry.domainLookupStart;
-    this.metrics.domainLookupEnd = navigationEntry.domainLookupEnd;
-    this.metrics.connectStart = navigationEntry.connectStart;
-    this.metrics.connectEnd = navigationEntry.connectEnd;
-    this.metrics.secureConnectionStart = navigationEntry.secureConnectionStart;
-    this.metrics.requestStart = navigationEntry.requestStart;
-    this.metrics.responseStart = navigationEntry.responseStart;
-    this.metrics.responseEnd = navigationEntry.responseEnd;
-    this.metrics.domLoading = navigationEntry.domLoading;
-    this.metrics.domInteractive = navigationEntry.domInteractive;
-    this.metrics.domContentLoadedEventStart = navigationEntry.domContentLoadedEventStart;
-    this.metrics.domContentLoadedEventEnd = navigationEntry.domContentLoadedEventEnd;
-    this.metrics.domComplete = navigationEntry.domComplete;
-    this.metrics.loadEventStart = navigationEntry.loadEventStart;
-    this.metrics.loadEventEnd = navigationEntry.loadEventEnd;
+    const navEntry = navigationEntry as any;
+    this.metrics.navigationStart = navEntry.navigationStart;
+    this.metrics.unloadEventStart = navEntry.unloadEventStart || 0;
+    this.metrics.unloadEventEnd = navEntry.unloadEventEnd || 0;
+    this.metrics.redirectStart = navEntry.redirectStart || 0;
+    this.metrics.redirectEnd = navEntry.redirectEnd || 0;
+    this.metrics.fetchStart = navEntry.fetchStart;
+    this.metrics.domainLookupStart = navEntry.domainLookupStart;
+    this.metrics.domainLookupEnd = navEntry.domainLookupEnd;
+    this.metrics.connectStart = navEntry.connectStart;
+    this.metrics.connectEnd = navEntry.connectEnd;
+    this.metrics.secureConnectionStart = navEntry.secureConnectionStart || 0;
+    this.metrics.requestStart = navEntry.requestStart;
+    this.metrics.responseStart = navEntry.responseStart;
+    this.metrics.responseEnd = navEntry.responseEnd;
+    this.metrics.domLoading = navEntry.domLoading;
+    this.metrics.domInteractive = navEntry.domInteractive;
+    this.metrics.domContentLoadedEventStart = navEntry.domContentLoadedEventStart;
+    this.metrics.domContentLoadedEventEnd = navEntry.domContentLoadedEventEnd;
+    this.metrics.domComplete = navEntry.domComplete;
+    this.metrics.loadEventStart = navEntry.loadEventStart || 0;
+    this.metrics.loadEventEnd = navEntry.loadEventEnd || 0;
 
     // 计算指标
-    this.metrics.ttfb = navigationEntry.responseStart - navigationEntry.requestStart;
-    this.metrics.domReady = navigationEntry.domContentLoadedEventEnd - navigationEntry.navigationStart;
-    this.metrics.onLoad = navigationEntry.loadEventEnd - navigationEntry.navigationStart;
-    this.metrics.redirectTime = navigationEntry.redirectEnd - navigationEntry.redirectStart;
-    this.metrics.dnsTime = navigationEntry.domainLookupEnd - navigationEntry.domainLookupStart;
-    this.metrics.tcpTime = navigationEntry.connectEnd - navigationEntry.connectStart;
-    this.metrics.sslTime = navigationEntry.secureConnectionStart > 0 ? 
-      navigationEntry.connectEnd - navigationEntry.secureConnectionStart : 0;
-    this.metrics.requestTime = navigationEntry.responseStart - navigationEntry.requestStart;
-    this.metrics.responseTime = navigationEntry.responseEnd - navigationEntry.responseStart;
-    this.metrics.domParseTime = navigationEntry.domInteractive - navigationEntry.domLoading;
-    this.metrics.resourcesLoadTime = navigationEntry.loadEventStart - navigationEntry.domContentLoadedEventEnd;
+    this.metrics.ttfb = navEntry.responseStart - navEntry.fetchStart;
+    this.metrics.domReady = navEntry.domContentLoadedEventEnd - navEntry.navigationStart;
+    this.metrics.onLoad = navEntry.loadEventEnd - navEntry.navigationStart;
+    this.metrics.redirectTime = navEntry.redirectEnd - navEntry.redirectStart;
+    this.metrics.dnsTime = navEntry.domainLookupEnd - navEntry.domainLookupStart;
+    this.metrics.tcpTime = navEntry.connectEnd - navEntry.connectStart;
+    this.metrics.sslTime = navEntry.secureConnectionStart ? navEntry.connectEnd - navEntry.secureConnectionStart : 0;
+    this.metrics.requestTime = navEntry.responseStart - navEntry.requestStart;
+    this.metrics.responseTime = navEntry.responseEnd - navEntry.responseStart;
+    this.metrics.domParseTime = navEntry.domInteractive - navEntry.domLoading;
+    this.metrics.resourcesLoadTime = navEntry.loadEventStart - navEntry.domContentLoadedEventEnd;
   }
 
   /**
@@ -181,15 +181,16 @@ export class PerformanceMonitor {
     const resourceObserver = new PerformanceObserver((entries) => {
       entries.getEntries().forEach((entry) => {
         if (entry.entryType === 'resource') {
+          const resourceEntry = entry as any;
           this.resourceMetrics.push({
             name: entry.name,
-            initiatorType: entry.initiatorType,
+            initiatorType: resourceEntry.initiatorType,
             duration: entry.duration,
-            transferSize: entry.transferSize,
-            encodedBodySize: entry.encodedBodySize,
-            decodedBodySize: entry.decodedBodySize,
+            transferSize: resourceEntry.transferSize,
+            encodedBodySize: resourceEntry.encodedBodySize,
+            decodedBodySize: resourceEntry.decodedBodySize,
             startTime: entry.startTime,
-            responseEnd: entry.responseEnd
+            responseEnd: resourceEntry.responseEnd
           });
         }
       });
@@ -241,5 +242,4 @@ export class PerformanceMonitor {
 // 导出单例
 export const performanceMonitor = new PerformanceMonitor();
 
-// 导出类型
-export type { PerformanceMetrics, ResourceMetrics };
+

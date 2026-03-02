@@ -249,6 +249,20 @@ export class WhiteScreenMonitor {
       isWhiteScreen: this.isWhiteScreen()
     };
   }
+
+  /**
+   * 设置白屏回调
+   */
+  setOnWhiteScreen(callback: (event: WhiteScreenEvent) => void) {
+    this.config.onWhiteScreen = callback;
+  }
+
+  /**
+   * 设置恢复回调
+   */
+  setOnRecovery(callback: (event: WhiteScreenEvent) => void) {
+    this.config.onRecovery = callback;
+  }
 }
 
 /**
@@ -281,5 +295,4 @@ export const whiteScreenMonitor = createWhiteScreenMonitor({
   }
 });
 
-// 导出类型
-export type { WhiteScreenEvent, WhiteScreenMonitorConfig };
+
