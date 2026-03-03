@@ -72,7 +72,7 @@ const getActivityColor = (type: string) => {
   <div class="dashboard-container">
     <div class="welcome-section">
       <h1>欢迎回来，{{ username }}！</h1>
-      <p>这是您的任务管理概览</p>
+      <p>这是您的任务管理概览({{ stats.total }}个任务)</p>
     </div>
 
     <a-row :gutter="[16, 16]" class="stats-row">
