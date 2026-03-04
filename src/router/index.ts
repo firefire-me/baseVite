@@ -93,6 +93,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import("../components/MonitorPanel.vue"),
         meta: { title: "性能监测", icon: "DashboardOutlined", key: "monitor" },
       },
+      {
+        path: "ai-qna",
+        name: "AIQnA",
+        component: () => import("../components/AIQnA.vue"),
+        meta: { title: "AI 问答", icon: "MessageOutlined", key: "ai-qna" },
+      },
 
       // 404 路由 重定向到首页的路由
       {
